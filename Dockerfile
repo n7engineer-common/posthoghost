@@ -97,7 +97,7 @@ RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/plugin
 
 # only prod dependencies in the node_module folder
 # as we will copy it to the last image.
-RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store \
+RUN --mount=type=cache,id=cache-pnpm,target=/tmp/pnpm-store \
     corepack enable && \
     NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-server install --frozen-lockfile --store-dir /tmp/pnpm-store --prod && \
     NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/plugin-server prepare
