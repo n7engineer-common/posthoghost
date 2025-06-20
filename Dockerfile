@@ -36,9 +36,8 @@ COPY common/eslint_rules/ common/eslint_rules/
 COPY common/tailwind/ common/tailwind/
 COPY products/ products/
 COPY ee/frontend/ ee/frontend/
-RUN --mount=type=cache,id=pnpm-store-cache-pnpm,target=/tmp/pnpm-store\
-    corepack enable && pnpm --version && \
-    pnpm --filter=@posthog/frontend... install --frozen-lockfile --store-dir /tmp/pnpm-store
+RUN corepack enable && pnpm --version && \
+    pnpm --filter=@posthog/frontend... install --frozen-lockfile
 
 COPY frontend/ frontend/
 RUN bin/turbo --filter=@posthog/frontend build
@@ -76,10 +75,9 @@ SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
 # Compile and install Node.js dependencies.
 # NOTE: we don't actually use the plugin-transpiler with the plugin-server, it's just here for the build.
-RUN --mount=type=cache,id=pnpm-store-cache-pnpm,target=/tmp/pnpm-store \
-    corepack enable && \
-    NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-server... install --frozen-lockfile --store-dir /tmp/pnpm-store && \
-    NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-transpiler... install --frozen-lockfile --store-dir /tmp/pnpm-store && \
+RUN corepack enable && \
+    NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-server... install --frozen-lockfile && \
+    NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-transpiler... install --frozen-lockfile && \
     NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/plugin-transpiler build
 
 # Build the plugin server.
@@ -97,9 +95,8 @@ RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/plugin
 
 # only prod dependencies in the node_module folder
 # as we will copy it to the last image.
-RUN --mount=type=cache,--id=pnpm-store-cache-pnpm,target=/tmp/pnpm-store \
-    corepack enable && \
-    NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-server install --frozen-lockfile --store-dir /tmp/pnpm-store --prod && \
+RUN corepack enable && \
+    NODE_OPTIONS="--max-old-space-size=16384" pnpm --filter=@posthog/plugin-server install --frozen-lockfile --prod && \
     NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/plugin-server prepare
 
 #
